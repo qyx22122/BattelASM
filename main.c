@@ -6,9 +6,9 @@
 
 //#define DEBUG
 
-#define PROG_COUNT 2
-#define MATCH_TIME 15
-#define MAX_PROG_SIZE 1024
+#define PROG_COUNT 2		//number of programs
+#define MATCH_TIME 15		//in seconds
+#define MAX_PROG_SIZE 1024	//max number of instructions
 #define MEM_SIZE (1<<16)
 
 enum {
@@ -125,7 +125,7 @@ int main() {
 	puts("Place | Name             | Score");
 	puts("------+------------------+------");
 	for(int i = 0; i < PROG_COUNT; i++)
-		printf("%4d# | %-16s | %d\n", i+1, progs[i].name, progs[i].score);
+		printf(" #%-3d | %-16s | %d\n", i+1, progs[i].name, progs[i].score);
 
 }
 
