@@ -92,17 +92,18 @@ void print_reg(program_t program);
 int run_match(program_t programs[], size_t len, int start_point, int* winner);
 void init_mem();
 int cmpProg(const void* prog1, const void* prog2);
+void display_score(program_t programs[]);
 
 uint16_t memory[MEM_SIZE];
 
 int main() {
 
 	uint16_t testprogmem1[16] = {0b0000000000000001, 0b1000000001111110, 0b1000100010000000, 0b1111100000000000, 0b1011100001000000};
-	uint16_t testprogmem2[16] = {0};
+	//uint16_t testprogmem2[16] = {0};
 	
 	program_t progs[PROG_COUNT] = {
 		{.name = "Program 1", .program_mem = testprogmem1, .offset = 0, .size = 16},
-		{.name = "Program 2", .program_mem = testprogmem2, .offset = 0, .size = 16},
+		{.name = "Program 2", .program_mem = testprogmem1, .offset = 0, .size = 16},
 	};
 	
 	for (int i = 0; i < PROG_COUNT; i++) {
@@ -113,19 +114,13 @@ int main() {
 		int ret = run_match(progs, PROG_COUNT, i, &winner);
 
 		if (ret == RET_OK) {
-			progs[winner].score++;
 			printf("%s won!\n\n", progs[winner].name);
 		} else if (ret == RET_TIE) {
 			printf("Tie!\n\n");
 		}
 	}
 
-	qsort(progs, PROG_COUNT, sizeof(program_t), cmpProg);
-
-	puts("Place | Name             | Score");
-	puts("------+------------------+------");
-	for(int i = 0; i < PROG_COUNT; i++)
-		printf(" #%-3d | %-16s | %d\n", i+1, progs[i].name, progs[i].score);
+	display_score(progs);
 
 }
 
@@ -270,6 +265,7 @@ int run_match(program_t programs[], size_t len, int start_point, int* winner) {
 
 			if (num_of_alive == 1) {
 				*winner = i;
+				(&programs[i])->score += 8;
 				return RET_OK;
 			}
 
@@ -285,6 +281,8 @@ int run_match(program_t programs[], size_t len, int start_point, int* winner) {
 		i++;
 		i %= len;
 	}
+	for (int i = 0; i < len; i++)
+		(&programs[i])->score += !prog_dead[i];
 	return RET_TIE;
 }
 
@@ -295,4 +293,13 @@ void init_mem() {
 
 int cmpProg(const void* prog1, const void* prog2) {
 	return ((program_t*)prog2)->score - ((program_t*)prog1)->score;
+}
+
+void display_score(program_t programs[]) {
+	qsort(programs, PROG_COUNT, sizeof(program_t), cmpProg);
+
+	puts("Place | Name             | Score");
+	puts("------+------------------+------");
+	for(int i = 0; i < PROG_COUNT; i++)
+		printf(" #%-3d | %-16s | %d\n", i+1, programs[i].name, programs[i].score);
 }
