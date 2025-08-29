@@ -4,7 +4,9 @@
 #include <stdbool.h>
 #include <time.h>
 
-//#define DEBUG
+#include "./examples/small_boy.c"
+
+#define DEBUG
 
 #define PROG_COUNT 2		//number of programs
 #define MATCH_TIME 15		//in seconds
@@ -102,7 +104,7 @@ int main() {
 	//uint16_t testprogmem2[16] = {0};
 	
 	program_t progs[PROG_COUNT] = {
-		{.name = "Program 1", .program_mem = testprogmem1, .offset = 0, .size = 16},
+		{.name = "Small_boy", .program_mem = small_boy_mem, .offset = small_boy_offset, .size = small_boy_size},
 		{.name = "Program 2", .program_mem = testprogmem1, .offset = 0, .size = 16},
 	};
 	
