@@ -1,3 +1,3 @@
 main: main.c examples/*
-	cc -Wall -Werror -o main main.c
+	cc -Wall -Werror -O3 -o main main.c
 	

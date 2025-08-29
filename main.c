@@ -6,10 +6,10 @@
 
 #include "./examples/small_boy.c"
 
-#define DEBUG
+//#define DEBUG
 
-#define PROG_COUNT 2		//number of programs
-#define MATCH_TIME 15		//in seconds
+#define PROG_COUNT 3		//number of programs
+#define MATCH_TIME 10		//in seconds
 #define MAX_PROG_SIZE 1024	//max number of instructions
 #define MEM_SIZE (1<<16)
 
@@ -100,12 +100,11 @@ uint16_t memory[MEM_SIZE];
 
 int main() {
 
-	uint16_t testprogmem1[16] = {0b0000000000000001, 0b1000000001111110, 0b1000100010000000, 0b1111100000000000, 0b1011100001000000};
-	//uint16_t testprogmem2[16] = {0};
 	
 	program_t progs[PROG_COUNT] = {
 		{.name = "Small_boy", .program_mem = small_boy_mem, .offset = small_boy_offset, .size = small_boy_size},
-		{.name = "Program 2", .program_mem = testprogmem1, .offset = 0, .size = 16},
+		{.name = "Small_boy2", .program_mem = small_boy_mem, .offset = small_boy_offset, .size = small_boy_size},
+		{.name = "NULL", .program_mem = NULL, .offset = 0, .size = 0},
 	};
 	
 	for (int i = 0; i < PROG_COUNT; i++) {
@@ -141,7 +140,7 @@ uint16_t get_rand_org() {
 void init_program(program_t* program) {
 	program->org = get_rand_org() + (((program->offset + program->size) <= MAX_PROG_SIZE) ? program->offset : 0);
 #ifdef DEBUG
-	printf("%s org : %d\n",program->name, program->org);
+	printf("%s org : 0x%X\n",program->name, program->org);
 #endif
 	for(uint16_t i = 0; i < program->size; i++)
 		memory[program->org + i] = program->program_mem[i];
@@ -158,6 +157,8 @@ int init_programs(program_t programs[], size_t len) {
 	
 	init_mem();
 
+	srand(time(0));
+
 	for(int i = 0; i < len; i++)
 		init_program(&programs[i]);
 
@@ -169,7 +170,7 @@ void process_instruction(program_t* program) {
 #ifdef DEBUG
 	printf("\n\nProgram : %s\n", program->name);
 	printf("life : %d\n", program->life);
-	printf("instruction : %x\n", instruction);
+	printf("instruction : %016b\n", instruction);
 	print_reg(*program);
 #endif
 
