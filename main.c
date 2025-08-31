@@ -5,11 +5,13 @@
 #include <time.h>
 
 #include "./examples/small_boy.c"
+#include "./examples/runner.c"
 
 //#define DEBUG
 
 #define PROG_COUNT 3		//number of programs
 #define MATCH_TIME 10		//in seconds
+#define NUM_OF_ROUNDS 3
 #define MAX_PROG_SIZE 1024	//max number of instructions
 #define MEM_SIZE (1<<16)
 
@@ -19,7 +21,6 @@
 enum {
 	RET_OK = 0,
 	RET_FAILED,
-	RET_INVALID_INSTRUCTION,
 	RET_TIE
 };
 
@@ -113,21 +114,24 @@ int main() {
 	
 	program_t progs[PROG_COUNT] = {
 		{.name = "Small_boy", .program_mem = small_boy_mem, .offset = small_boy_offset, .size = small_boy_size},
-		{.name = "Small_boy2", .program_mem = small_boy_mem, .offset = small_boy_offset, .size = small_boy_size},
+		{.name = "Runner", .program_mem = runner_mem, .offset = runner_offset, .size = runner_size},
 		{.name = "NULL", .program_mem = NULL, .offset = 0, .size = 0},
 	};
 	
-	for (int i = 0; i < PROG_COUNT; i++) {
-		printf("Game %d started...\n", i);
+	for (int round = 0; round < NUM_OF_ROUNDS; round++) {
+		printf("\nRound %d started...\n", round);
+		for (int i = 0; i < PROG_COUNT; i++) {
+			printf("\tGame %d started...\n", i);
 
-		int winner = -1;
-		init_programs(progs, PROG_COUNT);
-		int ret = run_match(progs, PROG_COUNT, i, &winner);
+			int winner = -1;
+			init_programs(progs, PROG_COUNT);
+			int ret = run_match(progs, PROG_COUNT, i, &winner);
 
-		if (ret == RET_OK) {
-			printf("%s won!\n\n", progs[winner].name);
-		} else if (ret == RET_TIE) {
-			printf("Tie!\n\n");
+			if (ret == RET_OK) {
+				printf("\t%s won!\n\n", progs[winner].name);
+			} else if (ret == RET_TIE) {
+				printf("\tTie!\n\n");
+			}
 		}
 	}
 
@@ -180,12 +184,6 @@ int init_programs(program_t programs[], size_t len) {
 
 void process_instruction(program_t* program) {
 	uint16_t instruction = memory[program->reg[PC]];
-#ifdef DEBUG
-	printf("\n\nProgram : %s\n", program->name);
-	printf("life : %d\n", program->life);
-	printf("instruction : %016b\n", instruction);
-	print_reg(*program);
-#endif
 
 
 	uint16_t sr1 = (instruction>>5) & 0x1f;
@@ -194,9 +192,7 @@ void process_instruction(program_t* program) {
 	//load instruction
 	if((instruction>>15) == OP_LDI) {
 		program->reg[R0] = instruction;
-		program->reg[PC]++;
-		program->life--;
-		return;
+		goto process_instruction_end;
 	}
 	switch(instruction>>10) {
 		case OP_MV:
@@ -278,6 +274,13 @@ void process_instruction(program_t* program) {
 		default:
 			program->life -= 9;
 	}
+process_instruction_end:
+#ifdef DEBUG
+	printf("\n\nProgram : %s\n", program->name);
+	printf("life : %d\n", program->life);
+	printf("instruction : %016b\n", instruction);
+	print_reg(*program);
+#endif
 	program->reg[PC]++;
 	program->life--;
 	return;
