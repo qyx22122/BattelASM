@@ -13,9 +13,13 @@
 #define MAX_PROG_SIZE 1024	//max number of instructions
 #define MEM_SIZE (1<<16)
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 enum {
 	RET_OK = 0,
 	RET_FAILED,
+	RET_INVALID_INSTRUCTION,
 	RET_TIE
 };
 
@@ -57,11 +61,12 @@ enum {
 
 enum {
 	OP_LDI = 0x0,
-	OP_MV = 0x10,
+	OP_MV = 0x20,
 	OP_ADD,
 	OP_NOT,
 	OP_AND,
 	OP_OR,
+	OP_XOR,
 	OP_SHL,
 	OP_SHR,
 	OP_JMP,
@@ -72,14 +77,14 @@ enum {
 	OP_ST,
 	OP_PUSH,
 	OP_POP,
-	OP_FLAG = 0x1f
+	OP_FLAG = 0x3f
 };
 
 typedef struct {
 	char name[16];
 	uint16_t score;
 	uint16_t reg[REG_COUNT];
-	uint16_t life;
+	int16_t life;
 	uint16_t org;
 	uint16_t offset;
 	uint16_t size;
@@ -142,6 +147,9 @@ void init_program(program_t* program) {
 #ifdef DEBUG
 	printf("%s org : 0x%X\n",program->name, program->org);
 #endif
+
+	program->size = MIN(program->size, MAX_PROG_SIZE);
+
 	for(uint16_t i = 0; i < program->size; i++)
 		memory[program->org + i] = program->program_mem[i];
 	for(uint16_t i = 0; i < REG_COUNT; i++)
@@ -175,8 +183,8 @@ void process_instruction(program_t* program) {
 #endif
 
 
-	uint16_t sr1 = (instruction>>6) & 0x1f;
-	uint16_t sr2 = (instruction>>1) & 0x1f;
+	uint16_t sr1 = (instruction>>5) & 0x1f;
+	uint16_t sr2 = (instruction) & 0x1f;
 	//load instruction
 	if((instruction>>15) == OP_LDI) {
 		program->reg[R0] = instruction;
@@ -184,7 +192,7 @@ void process_instruction(program_t* program) {
 		program->life--;
 		return;
 	}
-	switch(instruction>>11) {
+	switch(instruction>>10) {
 		case OP_MV:
 			program->reg[sr1] = program->reg[sr2];
 			break;
@@ -200,6 +208,9 @@ void process_instruction(program_t* program) {
 		case OP_OR:
 			program->reg[sr1] |= program->reg[sr2];
 			break;
+		case OP_XOR:
+			program->reg[sr1] ^= program->reg[sr2];
+			break;
 		case OP_SHL:
 			program->reg[sr1] <<= program->reg[sr2];
 			break;
@@ -212,24 +223,29 @@ void process_instruction(program_t* program) {
 		case OP_JZ:
 			if(!program->reg[sr2])
 				program->reg[PC] = program->reg[sr1];
+			program->life--;
 			break;
 		case OP_JN:
-			if(program->reg[sr2] < 0)
+			if(program->reg[sr2] >> 15)
 				program->reg[PC] = program->reg[sr1];
+			program->life--;
 			break;
 		case OP_JP:
-			if(program->reg[sr2] > 0)
+			if(!(program->reg[sr2] >> 15))
 				program->reg[PC] = program->reg[sr1];
+			program->life--;
 			break;
 		case OP_LD:
 			program->reg[sr1] = memory[program->reg[sr2]];
 			break;
 		case OP_ST:
 			memory[program->reg[sr2]] = program->reg[sr1];
+			program->life -= 9;
 			break;
 		case OP_PUSH:
 			memory[program->reg[SP]] = program->reg[sr1];
 			program->reg[SP]++;
+			program->life -= 9;
 			break;
 		case OP_POP:
 			program->reg[sr1] = memory[program->reg[SP]];
@@ -238,6 +254,8 @@ void process_instruction(program_t* program) {
 		case OP_FLAG:
 			program->life = 101;
 			break;
+		default:
+			program->life -= 9;
 	}
 	program->reg[PC]++;
 	program->life--;
