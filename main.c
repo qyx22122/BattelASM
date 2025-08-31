@@ -110,6 +110,8 @@ void display_score(program_t programs[]);
 uint16_t memory[MEM_SIZE];
 
 int main() {
+	
+	srand(time(0));
 
 	
 	program_t progs[PROG_COUNT] = {
@@ -182,7 +184,6 @@ int init_programs(program_t programs[], size_t len) {
 
 	get_rand_org(1);
 
-	srand(time(0));
 
 	for(int i = 0; i < len; i++)
 		init_program(&programs[i]);
