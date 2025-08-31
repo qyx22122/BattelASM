@@ -6,7 +6,7 @@
 
 #include "./examples/small_boy.c"
 
-#define DEBUG
+//#define DEBUG
 
 #define PROG_COUNT 3		//number of programs
 #define MATCH_TIME 10		//in seconds
@@ -63,6 +63,7 @@ enum {
 	OP_LDI = 0x0,
 	OP_MV = 0x20,
 	OP_ADD,
+	OP_SUB,
 	OP_NOT,
 	OP_AND,
 	OP_OR,
@@ -198,6 +199,9 @@ void process_instruction(program_t* program) {
 			break;
 		case OP_ADD:
 			program->reg[sr1] += program->reg[sr2];
+			break;
+		case OP_SUB:
+			program->reg[sr1] -= program->reg[sr2];
 			break;
 		case OP_NOT:
 			program->reg[sr1] = ~program->reg[sr1];
