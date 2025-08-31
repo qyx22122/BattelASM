@@ -97,7 +97,7 @@ typedef struct {
 	uint16_t* program_mem;
 } program_t;
 
-uint16_t get_rand_org();
+uint16_t get_rand_org(bool reset);
 void init_program(program_t* program);
 int init_programs(program_t programs[], size_t len);
 void process_instruction(program_t* program);
@@ -139,9 +139,15 @@ int main() {
 
 }
 
-uint16_t get_rand_org() {
+uint16_t get_rand_org(bool reset) {
 	static bool prog_cells[MEM_SIZE/MAX_PROG_SIZE] = {0};
 	uint16_t org;
+
+	if (reset) {
+		for (int i = 0; i < (MEM_SIZE/MAX_PROG_SIZE); i++)
+			prog_cells[i] = 0;
+		return 0;
+	}
 
 	do {
 		org = rand() % (MEM_SIZE/MAX_PROG_SIZE);
@@ -152,7 +158,7 @@ uint16_t get_rand_org() {
 }
 
 void init_program(program_t* program) {
-	program->org = get_rand_org() + (((program->offset + program->size) <= MAX_PROG_SIZE) ? program->offset : 0);
+	program->org = get_rand_org(0) + (((program->offset + program->size) <= MAX_PROG_SIZE) ? program->offset : 0);
 #ifdef DEBUG
 	printf("%s org : 0x%X\n",program->name, program->org);
 #endif
@@ -173,6 +179,8 @@ int init_programs(program_t programs[], size_t len) {
 		return RET_FAILED;
 	
 	init_mem();
+
+	get_rand_org(1);
 
 	srand(time(0));
 
