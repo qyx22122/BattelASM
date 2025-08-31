@@ -78,6 +78,10 @@ enum {
 	OP_ST,
 	OP_PUSH,
 	OP_POP,
+	OP_ADDI,
+	OP_SUBI,
+	OP_SHLI,
+	OP_SHRI,
 	OP_FLAG = 0x3f
 };
 
@@ -186,6 +190,7 @@ void process_instruction(program_t* program) {
 
 	uint16_t sr1 = (instruction>>5) & 0x1f;
 	uint16_t sr2 = (instruction) & 0x1f;
+	uint16_t val = sr2;
 	//load instruction
 	if((instruction>>15) == OP_LDI) {
 		program->reg[R0] = instruction;
@@ -257,6 +262,18 @@ void process_instruction(program_t* program) {
 			break;
 		case OP_FLAG:
 			program->life = 101;
+			break;
+		case OP_ADDI:
+			program->reg[sr1] += val;
+			break;
+		case OP_SUBI:
+			program->reg[sr1] -= val;
+			break;
+		case OP_SHLI:
+			program->reg[sr1] <<= val;
+			break;
+		case OP_SHRI:
+			program->reg[sr1] >>= val;
 			break;
 		default:
 			program->life -= 9;
