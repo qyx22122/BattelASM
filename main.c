@@ -6,7 +6,7 @@
 
 #include "./examples/small_boy.c"
 
-//#define DEBUG
+#define DEBUG
 
 #define PROG_COUNT 3		//number of programs
 #define MATCH_TIME 10		//in seconds
