@@ -10,8 +10,8 @@
 //#define DEBUG
 
 #define PROG_COUNT 3		//number of programs
-#define MATCH_TIME 10		//in seconds
-#define NUM_OF_ROUNDS 3
+#define MATCH_TIME 5		//in seconds
+#define NUM_OF_ROUNDS 1<<12
 #define MAX_PROG_SIZE 1024	//max number of instructions
 #define MEM_SIZE (1<<16)
 
