@@ -9,9 +9,9 @@
 
 //#define DEBUG
 
-#define PROG_COUNT 3		//number of programs
-#define MATCH_TIME 5		//in seconds
-#define NUM_OF_ROUNDS 1<<12
+#define PROG_COUNT 2		//number of programs
+#define MATCH_TIME 2		//in seconds
+#define NUM_OF_ROUNDS 1024
 #define MAX_PROG_SIZE 1024	//max number of instructions
 #define MEM_SIZE (1<<16)
 
@@ -117,7 +117,6 @@ int main() {
 	program_t progs[PROG_COUNT] = {
 		{.name = "Small_boy", .program_mem = small_boy_mem, .offset = small_boy_offset, .size = small_boy_size},
 		{.name = "Runner", .program_mem = runner_mem, .offset = runner_offset, .size = runner_size},
-		{.name = "NULL", .program_mem = NULL, .offset = 0, .size = 0},
 	};
 	
 	for (int round = 0; round < NUM_OF_ROUNDS; round++) {
