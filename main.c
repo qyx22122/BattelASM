@@ -244,7 +244,7 @@ void process_instruction(program_t* program) {
 			program->life--;
 			break;
 		case OP_JP:
-			if(!(program->reg[sr2] >> 15))
+			if(!(program->reg[sr2] >> 15) && !program->reg[sr2])
 				program->reg[PC] = program->reg[sr1];
 			program->life--;
 			break;
