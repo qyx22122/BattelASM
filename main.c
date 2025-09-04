@@ -7,7 +7,7 @@
 #include "./examples/small_boy.c"
 #include "./examples/runner.c"
 
-//#define DEBUG
+#define DEBUG
 
 #define PROG_COUNT 2		//number of programs
 #define MATCH_TIME 2		//in seconds
@@ -292,7 +292,11 @@ process_instruction_end:
 #ifdef DEBUG
 	printf("\n\nProgram : %s\n", program->name);
 	printf("life : %d\n", program->life);
-	printf("instruction : %016b\n", instruction);
+#if defined(__linux__)
+	printf("instruction : 0b%016b\n", instruction);
+#else
+	printf("instruction : 0x%04X\n", instruction);
+#endif
 	print_reg(*program);
 #endif
 	program->reg[PC]++;
