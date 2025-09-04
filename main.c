@@ -292,11 +292,7 @@ process_instruction_end:
 #ifdef DEBUG
 	printf("\n\nProgram : %s\n", program->name);
 	printf("life : %d\n", program->life);
-#if defined(__linux__)
 	printf("instruction : 0b%016b\n", instruction);
-#else
-	printf("instruction : 0x%04X\n", instruction);
-#endif
 	print_reg(*program);
 #endif
 	program->reg[PC]++;
