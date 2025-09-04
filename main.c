@@ -73,6 +73,7 @@ enum {
 	OP_SHR,
 	OP_JMP,
 	OP_JZ,
+	OP_JNZ,
 	OP_JN,
 	OP_JP,
 	OP_LD,
@@ -235,6 +236,11 @@ void process_instruction(program_t* program) {
 			break;
 		case OP_JZ:
 			if(!program->reg[sr2])
+				program->reg[PC] = program->reg[sr1];
+			program->life--;
+			break;
+		case OP_JNZ:
+			if(program->reg[sr2])
 				program->reg[PC] = program->reg[sr1];
 			program->life--;
 			break;
