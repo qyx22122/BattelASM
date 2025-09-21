@@ -7,7 +7,9 @@
 #include "./examples/small_boy.c"
 #include "./examples/runner.c"
 
-#define DEBUG
+//#define DEBUG
+#define VERBOSE
+//#define SILENT
 
 #define PROG_COUNT 2		//number of programs
 #define MATCH_TIME 2		//in seconds
@@ -17,6 +19,7 @@
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define UNUSED(value) (void)(value)
 
 enum {
 	RET_OK = 0,
@@ -121,19 +124,26 @@ int main() {
 	};
 	
 	for (int round = 0; round < NUM_OF_ROUNDS; round++) {
-		printf("\nRound %d started...\n", round);
+		printf("\nRound %d started...", round);
+
 		for (int i = 0; i < PROG_COUNT; i++) {
-			printf("\tGame %d started...\n", i);
+#ifdef VERBOSE
+			printf("\n\tGame %d started...\n", i);
+#endif
 
 			int winner = -1;
 			init_programs(progs, PROG_COUNT);
 			int ret = run_match(progs, PROG_COUNT, i, &winner);
 
+#ifndef SILENT
 			if (ret == RET_OK) {
 				printf("\t%s won!\n\n", progs[winner].name);
 			} else if (ret == RET_TIE) {
 				printf("\tTie!\n\n");
 			}
+#else
+			UNUSED(ret);
+#endif
 		}
 	}
 
