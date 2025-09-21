@@ -3,6 +3,7 @@
 		nativeBuildInputs = with pkgs; [
           gcc
           gnumake
+		  raylib
 		  gdb
 		  gf
 		];

@@ -7,11 +7,15 @@
 #include "./examples/small_boy.c"
 #include "./examples/runner.c"
 
-#define DEBUG
+//#define DEBUG
+#define MEMMON
+#ifdef MEMMON
+	#include "./memmon.c"
+#endif
 
 #define PROG_COUNT 2		//number of programs
 #define MATCH_TIME 2		//in seconds
-#define NUM_OF_ROUNDS 1024
+#define NUM_OF_ROUNDS 16
 #define MAX_PROG_SIZE 1024	//max number of instructions
 #define MEM_SIZE (1<<16)
 
@@ -89,6 +93,7 @@ enum {
 
 typedef struct {
 	char name[16];
+	Color color;
 	uint16_t score;
 	uint16_t reg[REG_COUNT];
 	int16_t life;
@@ -114,6 +119,10 @@ int main() {
 	
 	srand(time(0));
 
+#ifdef MEMMON
+	memmon_init();
+#endif
+
 	
 	program_t progs[PROG_COUNT] = {
 		{.name = "Small_boy", .program_mem = small_boy_mem, .offset = small_boy_offset, .size = small_boy_size},
@@ -134,10 +143,16 @@ int main() {
 			} else if (ret == RET_TIE) {
 				printf("\tTie!\n\n");
 			}
+#ifdef MEMMON
+			memon_reset();
+#endif
 		}
 	}
 
 	display_score(progs);
+#ifdef MEMMON
+	memmon_close();
+#endif
 
 }
 
@@ -167,8 +182,12 @@ void init_program(program_t* program) {
 
 	program->size = MIN(program->size, MAX_PROG_SIZE);
 
-	for(uint16_t i = 0; i < program->size; i++)
+	for(uint16_t i = 0; i < program->size; i++) {
 		memory[program->org + i] = program->program_mem[i];
+#ifdef MEMMON
+		memmon_update_pixle((program->org + i) % 256, (program->org + i) / 256, program->color);
+#endif
+	}
 	for(uint16_t i = 0; i < REG_COUNT; i++)
 		program->reg[i] = 0;
 
@@ -184,6 +203,8 @@ int init_programs(program_t programs[], size_t len) {
 
 	get_rand_org(1);
 
+	for(int i = 0; i < len; i++)
+		programs[i].color = colors[i % NUM_OF_COLORS];
 
 	for(int i = 0; i < len; i++)
 		init_program(&programs[i]);
@@ -260,11 +281,17 @@ void process_instruction(program_t* program) {
 		case OP_ST:
 			memory[program->reg[sr2]] = program->reg[sr1];
 			program->life -= 9;
+#ifdef MEMMON
+			memmon_update_pixle(program->reg[sr2] % 256, program->reg[sr2] / 256, program->color);
+#endif
 			break;
 		case OP_PUSH:
 			memory[program->reg[SP]] = program->reg[sr1];
 			program->reg[SP]++;
 			program->life -= 9;
+#ifdef MEMMON
+			memmon_update_pixle(program->reg[sr2] % 256, program->reg[sr2] / 256, program->color);
+#endif
 			break;
 		case OP_POP:
 			program->reg[sr1] = memory[program->reg[SP]];
