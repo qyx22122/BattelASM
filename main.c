@@ -4,20 +4,23 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "./memmon.c"
+
 #include "./examples/small_boy.c"
 #include "./examples/runner.c"
 
 //#define DEBUG
-#define VERBOSE
-//#define SILENT
+//#define VERBOSE
+#define SILENT
 
-#define MEMMON
+//#define MEMMON
 #ifdef MEMMON
-	#include "./memmon.c"
+	#define MATCH_TIME 100	//in seconds
+#else
+	#define MATCH_TIME 2	//in seconds
 #endif
 
 #define PROG_COUNT 2		//number of programs
-#define MATCH_TIME 2		//in seconds
 #define NUM_OF_ROUNDS 16
 #define MAX_PROG_SIZE 1024	//max number of instructions
 #define MEM_SIZE (1<<16)
@@ -197,7 +200,7 @@ void init_program(program_t* program) {
 	for(uint16_t i = 0; i < program->size; i++) {
 		memory[program->org + i] = program->program_mem[i];
 #ifdef MEMMON
-		memmon_update_pixle((program->org + i) % 256, (program->org + i) / 256, program->color);
+		memmon_update_pixle((program->org + i), program->color);
 #endif
 	}
 	for(uint16_t i = 0; i < REG_COUNT; i++)
@@ -294,16 +297,16 @@ void process_instruction(program_t* program) {
 			memory[program->reg[sr2]] = program->reg[sr1];
 			program->life -= 9;
 #ifdef MEMMON
-			memmon_update_pixle(program->reg[sr2] % 256, program->reg[sr2] / 256, program->color);
+			memmon_update_pixle(program->reg[sr2], program->color);
 #endif
 			break;
 		case OP_PUSH:
 			memory[program->reg[SP]] = program->reg[sr1];
+#ifdef MEMMON
+			memmon_update_pixle(program->reg[SP], program->color);
+#endif
 			program->reg[SP]++;
 			program->life -= 9;
-#ifdef MEMMON
-			memmon_update_pixle(program->reg[sr2] % 256, program->reg[sr2] / 256, program->color);
-#endif
 			break;
 		case OP_POP:
 			program->reg[sr1] = memory[program->reg[SP]];
@@ -396,8 +399,13 @@ int cmpProg(const void* prog1, const void* prog2) {
 void display_score(program_t programs[]) {
 	qsort(programs, PROG_COUNT, sizeof(program_t), cmpProg);
 
-	puts("Place | Name             | Score");
-	puts("------+------------------+------");
-	for(int i = 0; i < PROG_COUNT; i++)
-		printf(" #%-3d | %-16s | %d\n", i+1, programs[i].name, programs[i].score);
+	int sum = 0;
+	for (int i = 0; i < PROG_COUNT; i++)
+		sum += programs[i].score;
+
+	puts("\nPlace | Name             | Score  | Percentage");
+	puts("------+------------------+--------+-----------");
+	for (int i = 0; i < PROG_COUNT; i++)
+		printf(" #%-3d | %-16s | %-6d | %.2f%%\n", i + 1, programs[i].name, programs[i].score, (double)programs[i].score / sum * 100);
+
 }

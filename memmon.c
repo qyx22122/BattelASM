@@ -1,7 +1,9 @@
 #include <raylib.h>
 
 #define NUM_OF_COLORS 21
-#define FPS 30
+#define FPS 500
+
+//#define MEMMON_DEBUG
 
 #define memmon_close CloseWindow
 
@@ -28,9 +30,14 @@ void memon_reset() {
 }
 
 
-void memmon_update_pixle(uint16_t x, uint16_t y, Color color) {
+void memmon_update_pixle(uint16_t addr, Color color) {
+	int x = addr % 256;
+	int y = addr / 256;
 	BeginDrawing();
 		DrawRectangleV((Vector2){x*4,y*4}, (Vector2){4,4}, color);
 	EndDrawing();
+#ifdef MEMMON_DEBUG
+	printf("\nMEMMON : FPS = %d\n", GetFPS());
+#endif
 }
 
